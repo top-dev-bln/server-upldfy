@@ -9,8 +9,7 @@ app.use(cors());
 const CLIENT_ID =
   "397112946172-11uf7if7onqpi3b0oefdfolci9kph7hj.apps.googleusercontent.com";
 const CLIENT_SECRET = "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";
-const REDIRECT_URI =
-  "https://rovmgxgudxfaxrcuahos.supabase.co/auth/v1/callback";
+const REDIRECT_URI = "https://isolated.vercel.app";
 
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,
