@@ -25,7 +25,7 @@ app.get("/griveAuth", async (req, res) => {
     scope: scopes,
   });
 
-  res.send(url);
+  res.redirect(url);
   console.log("got called");
 });
 
