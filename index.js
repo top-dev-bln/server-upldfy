@@ -25,6 +25,18 @@ app.get("/griveAuth", async (req, res) => {
     scope: scopes,
   });
 
+  res.send(url);
+  console.log("got called");
+});
+
+app.get("/griveRedirect", async (req, res) => {
+  const scopes = ["https://www.googleapis.com/auth/drive"];
+
+  const url = oauth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: scopes,
+  });
+
   res.redirect(url);
   console.log("got called");
 });
