@@ -9,8 +9,7 @@ app.use(cors());
 const CLIENT_ID =
   "397112946172-11uf7if7onqpi3b0oefdfolci9kph7hj.apps.googleusercontent.com";
 const CLIENT_SECRET = "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";
-const REDIRECT_URI =
-  "https://previews.123rf.com/images/maldesowhat/maldesowhat1012/maldesowhat101200004/8443561-the-picutre-shows-a-landscape-at-winter.jpg";
+const REDIRECT_URI = "https://isolated.vercel.app";
 
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,
