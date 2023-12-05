@@ -17,45 +17,53 @@ app.use(cors());
 //TODO: import .env
 
 const oauth2Client = new google.auth.OAuth2(
-    CLIENT_ID,
-    CLIENT_SECRET,
-    REDIRECT_URI
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI
 );
 
 //supabase
 const { createClient } = require("@supabase/supabase-js");
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-app.post("/auth", async(req, res) => {
-    //add the code to supabase data base
+app.post("/auth", async (req, res) => {
+  const { code } = req.body;
+  const { tokens } = await oauth2Client.getToken(code);
+  const { refresh_token, access_token } = tokens;
 
-    const { code } = req.body;
-    const { tokens } = await oauth2Client.getToken(code);
-    res.send(tokens);
+  //save to database
+  const { data, error } = await supabase
+    .from("users")
+    .insert([{ refresh_token, access_token }]);
+  if (error) {
+    console.log(error);
+    res.send("error");
+  }
+  res.send("success");
 });
 
-app.get("/griveAuth", async(req, res) => {
-    const scopes = ["https://www.googleapis.com/auth/drive"];
+app.get("/griveAuth", async (req, res) => {
+  const scopes = ["https://www.googleapis.com/auth/drive"];
 
-    const url = oauth2Client.generateAuthUrl({
-        access_type: "offline",
-        scope: scopes,
-    });
+  const url = oauth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: scopes,
+  });
 
-    res.send(url);
-    console.log("got called");
+  res.send(url);
+  console.log("got called");
 });
 
-app.get("/griveRedirect", async(req, res) => {
-    const scopes = ["https://www.googleapis.com/auth/drive"];
+app.get("/griveRedirect", async (req, res) => {
+  const scopes = ["https://www.googleapis.com/auth/drive"];
 
-    const url = oauth2Client.generateAuthUrl({
-        access_type: "offline",
-        scope: scopes,
-    });
+  const url = oauth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: scopes,
+  });
 
-    res.redirect(url);
-    console.log("got called");
+  res.redirect(url);
+  console.log("got called");
 });
 
 app.listen(3000, () => console.log("Server ready"));
