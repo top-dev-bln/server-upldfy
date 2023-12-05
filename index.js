@@ -28,18 +28,15 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 app.post("/auth", async (req, res) => {
   const { code } = req.body;
+  const { userID } = req.body;
   const { tokens } = await oauth2Client.getToken(code);
   const { refresh_token, access_token } = tokens;
 
-  //save to database
-  const { data, error } = await supabase
-    .from("users")
-    .insert([{ refresh_token, access_token }]);
-  if (error) {
-    console.log(error);
-    res.send("error");
-  }
-  res.send("success");
+  //save to supabase
+  console.log("saving to supabase");
+  console.log(userID);
+
+  res.send("suck my balls");
 });
 
 app.get("/griveAuth", async (req, res) => {
