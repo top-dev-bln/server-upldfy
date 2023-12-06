@@ -14,7 +14,6 @@ const REDIRECT_URI = "https://isolated.vercel.app";
 const app = express();
 app.use(cors());
 app.use(express.json());
-
 //TODO: import .env
 
 const oauth2Client = new google.auth.OAuth2(
