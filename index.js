@@ -26,10 +26,10 @@ app.post("/token", async (req, res) => {
   try {
     const { tokens } = await oauth2Client.getToken(code);
     const { refresh_token, access_type } = tokens;
-    res.send(refresh_token);
+    res.send("sa va fut in gura");
   } catch (error) {
     console.log(error);
-    res.send(error);
+    res.send("sa va fut in gura ca nu merge");
   }
 });
 
