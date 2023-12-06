@@ -21,9 +21,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post("/auth", async (req, res) => {
+app.post("/token", async (req, res) => {
   const { code, userID } = req.body;
-
   res.send(code, userID);
 });
 
