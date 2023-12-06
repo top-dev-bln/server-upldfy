@@ -13,6 +13,7 @@ const REDIRECT_URI = "https://isolated.vercel.app";
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 //TODO: import .env
 
@@ -27,14 +28,11 @@ const { createClient } = require("@supabase/supabase-js");
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 app.post("/auth", async (req, res) => {
-  const { code } = req.body;
-  const { userID } = req.body;
+  const { code, userID } = req.body;
   const { tokens } = await oauth2Client.getToken(code);
   const { refresh_token, access_token } = tokens;
 
-  //save to supabase
-  console.log("saving to supabase");
-  console.log(userID);
+  //TODO: add refresh token to supabase
 
   res.send("suck my balls");
 });
