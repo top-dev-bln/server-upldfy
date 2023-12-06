@@ -36,6 +36,7 @@ app.get("/", async (req, res) => {
   const scopes = ["https://www.googleapis.com/auth/drive"];
   const url = oauth2Client.generateAuthUrl({
     access_type: "offline",
+    prompt: "consent",
     scope: scopes,
   });
 
@@ -47,6 +48,7 @@ app.get("/griveRedirect", async (req, res) => {
 
   const url = oauth2Client.generateAuthUrl({
     access_type: "offline",
+    prompt: "consent",
     scope: scopes,
   });
 
