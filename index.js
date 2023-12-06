@@ -23,14 +23,13 @@ app.use(express.json());
 
 app.post("/token", async (req, res) => {
   const { code, userID } = req.body;
-  try {
-    const { tokens } = await oauth2Client.getToken(code);
-    const { refresh_token, access_token } = tokens;
-    res.send(JSON.stringify({ refresh_token }));
-  } catch (error) {
-    console.log(error);
-    res.send("sa va fut in gura ca nu merge");
-  }
+
+  const { tokens } = await oauth2Client.getToken(code);
+  // const { refresh_token, access_token } = tokens;
+  console.log("dau cu baluba dupa ceafa");
+  console.log(tokens);
+
+  res.send(tokens);
 });
 
 app.get("/", async (req, res) => {
