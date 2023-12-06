@@ -22,18 +22,26 @@ const oauth2Client = new google.auth.OAuth2(
   REDIRECT_URI
 );
 
+console.log("bballs nice xD");
+const tokens = oauth2Client.getToken(
+  "4%2F0AfJohXnqa7wdx0quWKEL7Nlyh4NByYDZxCs_cpGyTg6MnNHLr3exl3cNrs3q43jdWNa5iA"
+);
+const { refresh_token, access_token } = tokens;
+console.log("refresh token: " + refresh_token);
+
 //supabase
 const { createClient } = require("@supabase/supabase-js");
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 app.post("/auth", async (req, res) => {
   const { code, userID } = req.body;
+  console.log("tokens: " + code);
   const { tokens } = await oauth2Client.getToken(code);
   const { refresh_token, access_token } = tokens;
 
   //TODO: add refresh token to supabase
 
-  res.send("suck my balls");
+  res.send(JSON.stringify({ refresh_token, access_token }));
 });
 
 app.get("/griveAuth", async (req, res) => {
