@@ -24,9 +24,9 @@ app.use(express.json());
 app.post("/token", async (req, res) => {
   const { code, userID } = req.body;
   try {
-    // const { tokens } = await oauth2Client.getToken(code);
-    //const { refresh_token, access_type } = tokens;
-    res.send("sa va fut in gura");
+    const { tokens } = await oauth2Client.getToken(code);
+    const { refresh_token, access_type } = tokens;
+    res.send(refresh_token);
   } catch (error) {
     console.log(error);
     res.send("sa va fut in gura ca nu merge");
