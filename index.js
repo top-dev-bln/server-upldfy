@@ -26,7 +26,7 @@ app.post("/token", async (req, res) => {
   try {
     const { tokens } = await oauth2Client.getToken(code);
     const { refresh_token, access_token } = tokens;
-    res.send(JSON.stringify({ refresh_token, access_token, userID }));
+    res.send(JSON.stringify({ refresh_token }));
   } catch (error) {
     console.log(error);
     res.send("sa va fut in gura ca nu merge");
