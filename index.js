@@ -24,13 +24,13 @@ const oauth2Client = new google.auth.OAuth2(
   REDIRECT_URI
 );
 
+
 //supabase
 const { createClient } = require("@supabase/supabase-js");
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 app.post("/auth", async (req, res) => {
-  const { code } = req.body;
-  const { userID } = req.body;
+  const { code,userID } = req.body;
   const { tokens } = await oauth2Client.getToken(code);
   const { refresh_token, access_token } = tokens;
 
