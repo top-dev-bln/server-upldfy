@@ -22,7 +22,7 @@ app.use(cors());
 app.use(express.json());
 
 app.post("/token", async (req, res) => {
-  const { code, userID } = req.body;
+  const { code } = req.body;
 
   const { tokens } = await oauth2Client.getToken(code);
   // const { refresh_token, access_token } = tokens;
