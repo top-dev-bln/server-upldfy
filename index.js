@@ -23,7 +23,7 @@ app.use(express.json());
 
 app.post("/token", async (req, res) => {
   const { code, userID } = req.body;
-  res.send(code, userID);
+  res.send(JSON.stringify({ code, userID }));
 });
 
 app.get("/griveRedirect", async (req, res) => {
