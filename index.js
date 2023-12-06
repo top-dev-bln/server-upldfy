@@ -22,11 +22,25 @@ app.use(cors());
 app.use(express.json());
 
 app.post("/token", async (req, res) => {
-  const { code, userID } = req.body;
-  const { tokens } = await oauth2Client.getToken(code);
-  const { refresh_token, access_type } = tokens;
+  const { code } = req.body;
+  try {
+    const { tokens } = await oauth2Client.getToken(code);
+    const { refresh_token, access_type } = tokens;
+    res.send(refresh_token);
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
 
-  res.send(refresh_token);
+app.get("/", async (req, res) => {
+  const scopes = ["https://www.googleapis.com/auth/drive"];
+  const url = oauth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: scopes,
+  });
+
+  res.send(url);
 });
 
 app.get("/griveRedirect", async (req, res) => {
