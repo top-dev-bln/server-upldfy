@@ -3,11 +3,11 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const REDIRECT_URI = "https://isolated.vercel.app";
 const app = express();
 
