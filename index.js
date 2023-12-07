@@ -30,7 +30,7 @@ app.post("/token", async (req, res) => {
   console.log(code);
   //console.log(tokens);
 
-  res.send(JSON.stringify({ code: code }));
+  res.send(JSON.stringify({ code: "sa imi iei baluba la maturat" }));
 });
 
 app.get("/", async (req, res) => {
