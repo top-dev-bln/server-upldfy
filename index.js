@@ -24,13 +24,13 @@ app.use(express.json());
 app.post("/token", async (req, res) => {
   const { code } = req.body;
 
-  //const { tokens } = await oauth2Client.getToken(code);
-  // const { refresh_token, access_token } = tokens;
+  const { tokens } = await oauth2Client.getToken(code);
+  const { refresh_token, access_token } = tokens;
   console.log("vorba aia : ");
   console.log(code);
   //console.log(tokens);
 
-  res.send(JSON.stringify({ baluba: code }));
+  res.send(JSON.stringify({ ref_tkn: refresh_token, acc_tkn: access_token }));
 });
 
 app.get("/", async (req, res) => {
