@@ -26,7 +26,7 @@ app.post("/token", async (req, res) => {
 
   //const { tokens } = await oauth2Client.getToken(code);
   // const { refresh_token, access_token } = tokens;
-  console.log("dau cu baluba dupa ceafa");
+  console.log("vorba aia : ");
   console.log(code);
   //console.log(tokens);
 
