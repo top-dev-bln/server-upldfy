@@ -22,22 +22,10 @@ app.use(cors());
 app.use(express.json());
 
 app.post("/token", async (req, res) => {
-  //const { code } = req.body;
-  console.log(req.body);
-  /*try {
-          const { tokens } = await oauth2Client.getToken(code);
-        } catch (error) {
-          console.error("Error retrieving access token", error);
-          res.send(JSON.stringify({ eruare: error }));
-          return;
-        }
-        //const { refresh_token, access_token } = tokens;
-        console.log("vorba aia : ");
-        console.log(code);
-        //console.log(tokens);
-
-        res.send(JSON.stringify({}));*/
-  res.send(JSON.stringify({ cock: "big" }));
+  const { code } = req.body;
+  const { tokens } = await oauth2Client.getToken(code);
+  console.log(tokens);
+  res.send(JSON.stringify({ gay: "sex" }));
 });
 
 app.get("/", async (req, res) => {
