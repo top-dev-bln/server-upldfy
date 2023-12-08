@@ -23,11 +23,25 @@ app.use(express.json());
 
 app.post("/token", async (req, res) => {
   const { acc_tkn, ref_tkn } = req.body;
-  /*
-              oauth2Client.setCredentials({
-                access_token: acc_tkn,
-                refresh_token: ref_tkn,
-              });*/
+
+  oauth2Client.setCredentials({
+    access_token: acc_tkn,
+    refresh_token: ref_tkn,
+  });
+
+  const drive = google.drive({
+    version: "v3",
+    auth: oauth2Client,
+  });
+
+  // test drive
+  const response = await drive.files.list({
+    pageSize: 10,
+    fields: "nextPageToken, files(id, name)",
+  });
+  console.log(response.data.files);
+
+  console.log("o mers coisane");
 
   res.send(JSON.stringify({ gay: "sex" }));
 });
