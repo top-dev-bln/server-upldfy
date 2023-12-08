@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
+const path = require("path");
 
 dotenv.config();
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -37,7 +38,7 @@ app.post("/token", async (req, res) => {
   // test drive
   const response = await drive.files.list({
     pageSize: 10,
-    fields: "nextPageToken, files(id, name)",
+    fields: "nextPageToken, files(id, name), files/webContentLink",
   });
   console.log(response.data.files);
 
@@ -46,10 +47,8 @@ app.post("/token", async (req, res) => {
   res.send(JSON.stringify({ gay: "sex" }));
 });
 
-app.get("/", async (req, res) => {
-  res.send(
-    "cum ai ajuns pe pagina de la server, vezi bosule ca tre sa dai request aici n-ai treaba tu cu backendu'"
-  );
+app.get("/", function (req, res) {
+  res.sendFile(path.join(__dirname, "/cox.html"));
 });
 
 app.get("/griveRedirect", async (req, res) => {
