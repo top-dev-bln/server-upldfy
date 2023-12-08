@@ -22,37 +22,13 @@ app.use(cors());
 app.use(express.json());
 
 app.post("/token", async (req, res) => {
-  const { code1 } = req.body;
-  const { code2 } = req.body;
-  const { code3 } = req.body;
-  const { code4 } = req.body;
+  const { acc_tkn, ref_tkn } = req.body;
 
-  try {
-    console.log("cod1");
-    oauth2Client.getToken(code1);
-  } catch (err) {
-    console.log(err);
-  }
-  try {
-    console.log("cod2");
-    oauth2Client.getToken(code2);
-  } catch (err) {
-    console.log(err);
-  }
-  try {
-    console.log("cod3");
-    oauth2Client.getToken(code3);
-  } catch (err) {
-    console.log(err);
-  }
-  try {
-    console.log("cod4");
-    oauth2Client.getToken(code4);
-  } catch (err) {
-    console.log(err);
-  }
+  oauth2Client.setCredentials({
+    access_token: acc_tkn,
+    refresh_token: ref_tkn,
+  });
 
-  console.log(tokens);
   res.send(JSON.stringify({ gay: "sex" }));
 });
 
