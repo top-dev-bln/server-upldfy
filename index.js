@@ -23,13 +23,13 @@ app.use(express.json());
 
 app.post("/token", async (req, res) => {
   const { acc_tkn, ref_tkn } = req.body;
+  /*
+          oauth2Client.setCredentials({
+            access_token: acc_tkn,
+            refresh_token: ref_tkn,
+          });*/
 
-  oauth2Client.setCredentials({
-    access_token: acc_tkn,
-    refresh_token: ref_tkn,
-  });
-
-  res.send(JSON.stringify({ gay: "sex" }));
+  res.send(JSON.stringify({ gay: "sex", acses: acc_tkn, rifres: ref_tkn }));
 });
 
 app.get("/", async (req, res) => {
