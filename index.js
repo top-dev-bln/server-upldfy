@@ -57,14 +57,9 @@ app.post("/token", async (req, res) => {
 });
 
 app.get("/", async (req, res) => {
-  const scopes = ["https://www.googleapis.com/auth/drive"];
-  const url = oauth2Client.generateAuthUrl({
-    access_type: "offline",
-    prompt: "consent",
-    scope: scopes,
-  });
-
-  res.send(url);
+  res.send(
+    "cum ai ajuns pe pagina de la server, vezi bosule ca tre sa dai request aici n-ai treaba tu cu backendu'"
+  );
 });
 
 app.get("/griveRedirect", async (req, res) => {
