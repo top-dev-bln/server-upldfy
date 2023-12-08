@@ -27,7 +27,31 @@ app.post("/token", async (req, res) => {
   const { code3 } = req.body;
   const { code4 } = req.body;
 
-  const { tokens } = await oauth2Client.getToken(code);
+  try {
+    console.log("cod1");
+    oauth2Client.getToken(code1);
+  } catch (err) {
+    console.log(err);
+  }
+  try {
+    console.log("cod2");
+    oauth2Client.getToken(code2);
+  } catch (err) {
+    console.log(err);
+  }
+  try {
+    console.log("cod3");
+    oauth2Client.getToken(code3);
+  } catch (err) {
+    console.log(err);
+  }
+  try {
+    console.log("cod4");
+    oauth2Client.getToken(code4);
+  } catch (err) {
+    console.log(err);
+  }
+
   console.log(tokens);
   res.send(JSON.stringify({ gay: "sex" }));
 });
