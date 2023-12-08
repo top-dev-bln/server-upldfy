@@ -27,6 +27,7 @@ app.post("/token", async (req, res) => {
 });
 
 app.post("/drive", async (req, res) => {
+  console.log("buna dimineata");
   const { ref_tkn } = req.body;
 
   oauth2Client.setCredentials({
