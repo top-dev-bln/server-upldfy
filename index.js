@@ -23,6 +23,10 @@ app.use(cors());
 app.use(express.json());
 
 app.post("/token", async (req, res) => {
+  res.send("ok");
+});
+
+app.post("/drive", async (req, res) => {
   const { acc_tkn, ref_tkn } = req.body;
 
   oauth2Client.setCredentials({
