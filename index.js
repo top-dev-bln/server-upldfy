@@ -26,6 +26,7 @@ app.post("/token", async (req, res) => {
   const { code2 } = req.body;
   const { code3 } = req.body;
   const { code4 } = req.body;
+
   const { tokens } = await oauth2Client.getToken(code);
   console.log(tokens);
   res.send(JSON.stringify({ gay: "sex" }));
