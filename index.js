@@ -26,6 +26,10 @@ app.post("/token", async (req, res) => {
   res.send("u up balls ?");
 });
 
+app.get("/test", async (req, res) => {
+  res.send("u up balls ?");
+});
+
 app.post("/drive", async (req, res) => {
   console.log("buna dimineata");
   const { ref_tkn } = req.body;
