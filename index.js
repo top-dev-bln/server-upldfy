@@ -25,36 +25,27 @@ app.use(express.json());
 app.post("/token", async (req, res) => {
   const { ref_tkn, id } = req.body;
 
-  res.send("l-am primit boss il bag in baza de date");
-});
-
-app.post("/test", async (req, res) => {
-  res.send("u up balls ?");
+  res.send("il trimit la muie pe " + id);
 });
 
 app.post("/drive", async (req, res) => {
-  console.log("buna dimineata");
   const { ref_tkn } = req.body;
 
   oauth2Client.setCredentials({
     refresh_token: ref_tkn,
   });
-  console.log("dau la muie si bat campii");
+
   const drive = google.drive({
     version: "v3",
     auth: oauth2Client,
   });
 
-  // test drive
   const response = await drive.files.list({
     pageSize: 10,
     fields: "nextPageToken, files(id, name), files/webContentLink",
   });
-  console.log(response.data.files);
 
-  console.log("o mers coisane");
-
-  res.send(JSON.stringify({ gay: "sex" }));
+  res.send(JSON.stringify(response.data.files));
 });
 
 app.get("/", function (req, res) {
