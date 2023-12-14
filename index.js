@@ -26,7 +26,7 @@ app.post("/token", async (req, res) => {
   res.send("u up balls ?");
 });
 
-app.get("/test", async (req, res) => {
+app.post("/test", async (req, res) => {
   res.send("u up balls ?");
 });
 
