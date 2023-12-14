@@ -23,8 +23,9 @@ app.use(cors());
 app.use(express.json());
 
 app.post("/token", async (req, res) => {
-  const { acc_tkn, ref_tkn } = req.body;
-  res.send(acc_tkn + " " + ref_tkn);
+  const { ref_tkn, id } = req.body;
+
+  res.send("l-am primit boss il bag in baza de date");
 });
 
 app.post("/test", async (req, res) => {
