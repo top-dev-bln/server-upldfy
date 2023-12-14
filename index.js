@@ -24,7 +24,7 @@ app.use(express.json());
 
 app.post("/token", async (req, res) => {
   const { acc_tkn, ref_tkn } = req.body;
-  res.send("u up balls ?");
+  res.send(acc_tkn + " " + ref_tkn);
 });
 
 app.post("/test", async (req, res) => {
