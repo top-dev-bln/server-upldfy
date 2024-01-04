@@ -44,6 +44,29 @@ app.post("/token", async (req, res) => {
   res.send({ status: "ok" });
 });
 
+app.post("/create-page", async (req, res) => {
+  const { access, name } = req.body;
+  const authed = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${access}`,
+      },
+    },
+  });
+
+  const { data, error } = await authed
+    .from("pages")
+    .insert([{ name: name }])
+    .select();
+  if (error) {
+    console.log(error);
+    res.send(JSON.stringify({ error: error }));
+    return;
+  }
+
+  res.send({ create_status: "ok", data: data });
+});
+
 app.post("/pitong", async (req, res) => {
   const { user_id, access } = req.body;
   const authed = createClient(supabaseUrl, supabaseAnonKey, {
