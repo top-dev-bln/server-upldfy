@@ -22,12 +22,18 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post("/token", async (req, res) => {
-  const { user_id, access, ref_tkn } = req.body;
+app.get("/", function (req, res) {
+  res.sendFile(path.join(__dirname, "/cox.html"));
+});
+
+app.post("/token/:user_id", async (req, res) => {
+  const { ref_tkn } = req.body;
+  const user_id = req.params.user_id;
+
   const authed = createClient(supabaseUrl, supabaseAnonKey, {
     global: {
       headers: {
-        Authorization: `Bearer ${access}`,
+        Authorization: req.headers.authorization,
       },
     },
   });
@@ -45,11 +51,11 @@ app.post("/token", async (req, res) => {
 });
 
 app.post("/create-page", async (req, res) => {
-  const { access, name } = req.body;
+  const { name } = req.body;
   const authed = createClient(supabaseUrl, supabaseAnonKey, {
     global: {
       headers: {
-        Authorization: `Bearer ${access}`,
+        Authorization: req.headers.authorization,
       },
     },
   });
@@ -65,38 +71,6 @@ app.post("/create-page", async (req, res) => {
   }
 
   res.send({ create_status: "ok", data: data });
-});
-
-app.post("/pitong", async (req, res) => {
-  const { user_id, access } = req.body;
-  const authed = createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: {
-        Authorization: `Bearer ${access}`,
-      },
-    },
-  });
-
-  //get refresh token from supabase
-  let { data, error } = await authed
-    .from("profiles")
-    .select("token")
-    .eq("id", user_id);
-
-  const ref_tkn = data[0].token;
-  oauth2Client.setCredentials({
-    refresh_token: ref_tkn,
-  });
-  const drive = google.drive({
-    version: "v3",
-    auth: oauth2Client,
-  });
-  const response = await drive.files.list({
-    pageSize: 10,
-    fields: "nextPageToken, files(id, name), files/webContentLink",
-  });
-
-  res.send(JSON.stringify(response.data.files));
 });
 
 app.post("/drive", async (req, res) => {
@@ -117,65 +91,6 @@ app.post("/drive", async (req, res) => {
   });
 
   res.send(JSON.stringify(response.data.files));
-});
-
-app.post("/db", async (req, res) => {
-  console.log(".............REQUEST.............");
-  const { user_id, access } = req.body;
-  const authed = createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: {
-        Authorization: `Bearer ${access}`,
-      },
-    },
-  });
-
-  let { data, error } = await authed
-    .from("profiles")
-    .select("name")
-    .eq("id", user_id);
-
-  console.log(data);
-
-  res.send(JSON.stringify(data));
-});
-
-app.post("/temp", async (req, res) => {
-  const { user_id, ref_tkn } = req.body;
-  //send to supabase public.profiles where id = user_id and update ref_tkn that is called token in supabase
-  const { data, error } = await supabase
-    .from("profiles")
-    .update({ token: ref_tkn })
-    .eq("id", user_id);
-  if (error) {
-    console.log(error);
-    res.send(JSON.stringify({ error: error }));
-    return;
-  }
-
-  res.sendStatus(200);
-});
-
-app.post("/test", async (req, res) => {
-  const { user_id, ref_tkn } = req.body;
-  res.send(JSON.stringify({ id: user_id, ref_tkn: ref_tkn }));
-});
-
-app.get("/", function (req, res) {
-  res.sendFile(path.join(__dirname, "/cox.html"));
-});
-
-app.get("/griveRedirect", async (req, res) => {
-  const scopes = ["https://www.googleapis.com/auth/drive"];
-
-  const url = oauth2Client.generateAuthUrl({
-    access_type: "offline",
-    prompt: "consent",
-    scope: scopes,
-  });
-
-  res.redirect(url);
-  console.log("got called");
 });
 
 app.listen(5000, () => console.log("Server ready"));
