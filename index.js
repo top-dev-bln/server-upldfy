@@ -1,5 +1,6 @@
 const google = require("googleapis").google;
 const express = require("express");
+const multer = require("multer");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
@@ -17,7 +18,8 @@ const oauth2Client = new google.auth.OAuth2(
   CLIENT_SECRET,
   REDIRECT_URI
 );
-
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -28,6 +30,7 @@ app.get("/", function (req, res) {
 
 app.post("/token/:user_id", async (req, res) => {
   const { ref_tkn } = req.body;
+
   const user_id = req.params.user_id;
 
   const authed = createClient(supabaseUrl, supabaseAnonKey, {
@@ -43,7 +46,7 @@ app.post("/token/:user_id", async (req, res) => {
     .eq("id", user_id)
     .select();
   if (error) {
-    console.log(error);
+    console.error(error);
     res.send(JSON.stringify({ error: error }));
     return;
   }
@@ -65,12 +68,27 @@ app.post("/create-page", async (req, res) => {
     .insert([{ name: name }])
     .select();
   if (error) {
-    console.log(error);
+    console.error(error);
     res.send(JSON.stringify({ error: error }));
     return;
   }
 
   res.send({ create_status: "ok", data: data });
+});
+
+app.post("/upload/:id", upload.array("files", 10), (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const { name } = req.body;
+    console.log("Received name:", name);
+    const files = req.files;
+    console.log("Received files:", files);
+    res.send({ upload_status: "ok", data: files });
+  } catch (error) {
+    console.error("Error ", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 app.post("/drive", async (req, res) => {
