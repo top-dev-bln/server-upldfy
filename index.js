@@ -35,6 +35,7 @@ app.get("/", function (req, res) {
 
 app.get("/page-info/:page_id", async (req, res) => {
   const page_id = req.params.page_id;
+  
 
   const client = new Client({
     connectionString: connectionString,
@@ -49,6 +50,7 @@ app.get("/page-info/:page_id", async (req, res) => {
           if (err) {
             console.log(err.message);
           } else {
+            console.log(result.rows[0]);
             res.send(JSON.stringify(result.rows[0]));
           }
         }
@@ -69,31 +71,33 @@ app.get("/my-pages", async (req, res) => {
   });
   const { data: data, error } = await authed.from("pages").select("*");
 
-  /*oauth2Client.setCredentials({
-                                                  refresh_token: ref_tkn,
-                                              });
+  /*
 
-                                              const drive = google.drive({
-                                                  version: "v3",
-                                                  auth: oauth2Client,
-                                              });
+                                              
 
                                               //print all folder names
-                                              const response = await drive.files.list({
-                                                  //application/vnd.google-apps.folder
-                                                  q: "mimeType='application/vnd.google-apps.folder'",
-                                              });
-                                              console.log("FOLDERS:");
-                                              response.data.files.forEach((file) => {
-                                                  console.log(file.name);
-                                              }); */
+                                               */
 
-  const { data: pages } = await authed.from("pages").select("id");
-  const pageid = pages[0].id;
-  console.log(pageid);
+  
   const { data: profiles } = await authed.from("profiles").select("*");
-  const profileid = profiles[0].id;
-  console.log(profileid);
+  const token = profiles[0].token;
+
+  oauth2Client.setCredentials({
+    refresh_token: token,
+});
+
+const drive = google.drive({
+  version: "v3",
+  auth: oauth2Client,
+});
+const response = await drive.files.list({
+  q: "mimeType='application/vnd.google-apps.folder'",
+});
+console.log("FOLDERS:");
+response.data.files.forEach((file) => {
+  console.log(file);
+});
+  
 
   res.send({ status: "ok", data: data });
 });
@@ -122,6 +126,38 @@ app.post("/token/:user_id", async (req, res) => {
     res.send(JSON.stringify({ error: error }));
     return;
   }
+
+  const{data:profiles} = await authed 
+  .from("profiles")
+  .update({token:ref_tkn})
+  
+
+  console.log();
+
+  if(false){
+
+    oauth2Client.setCredentials({
+      refresh_token: token,
+  });
+  
+  const drive = google.drive({
+    version: "v3",
+    auth: oauth2Client,
+  });
+  
+  const response = await drive.files.list({
+    q: "mimeType='application/vnd.google-apps.folder'",
+  });
+  console.log("FOLDERS:");
+  response.data.files.forEach((file) => {
+    console.log(file);
+  });
+  
+
+  }
+
+
+
 
   res.send({ status: "ok" });
 });
