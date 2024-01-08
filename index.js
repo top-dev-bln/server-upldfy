@@ -5,19 +5,24 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
 const path = require("path");
+const { Client } = require("pg");
+const { get } = require("http");
 
 dotenv.config();
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+const connectionString = process.env.DATABASE_URL;
+
 const REDIRECT_URI = "https://isolated.vercel.app";
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,
   CLIENT_SECRET,
   REDIRECT_URI
 );
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const app = express();
@@ -27,6 +32,73 @@ app.use(express.json());
 app.get("/", function (req, res) {
   res.sendFile(path.join(__dirname, "/cox.html"));
 });
+
+app.get("/page-info/:page_id", async (req, res) => {
+  const page_id = req.params.page_id;
+
+  const client = new Client({
+    connectionString: connectionString,
+  });
+  client
+    .connect()
+    .then(() => {
+      client.query(
+        "SELECT name FROM public.pages WHERE id = $1",
+        [page_id],
+        (err, result) => {
+          if (err) {
+            console.log(err.message);
+          } else {
+            res.send(JSON.stringify(result.rows[0]));
+          }
+        }
+      );
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
+});
+
+app.get("/my-pages", async (req, res) => {
+  const authed = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    },
+  });
+  const { data: data, error } = await authed.from("pages").select("*");
+
+  /*oauth2Client.setCredentials({
+                                                  refresh_token: ref_tkn,
+                                              });
+
+                                              const drive = google.drive({
+                                                  version: "v3",
+                                                  auth: oauth2Client,
+                                              });
+
+                                              //print all folder names
+                                              const response = await drive.files.list({
+                                                  //application/vnd.google-apps.folder
+                                                  q: "mimeType='application/vnd.google-apps.folder'",
+                                              });
+                                              console.log("FOLDERS:");
+                                              response.data.files.forEach((file) => {
+                                                  console.log(file.name);
+                                              }); */
+
+  const { data: pages } = await authed.from("pages").select("id");
+  const pageid = pages[0].id;
+  console.log(pageid);
+  const { data: profiles } = await authed.from("profiles").select("*");
+  const profileid = profiles[0].id;
+  console.log(profileid);
+
+  res.send({ status: "ok", data: data });
+});
+
+//todo app.get pentru files
 
 app.post("/token/:user_id", async (req, res) => {
   const { ref_tkn } = req.body;
@@ -50,6 +122,7 @@ app.post("/token/:user_id", async (req, res) => {
     res.send(JSON.stringify({ error: error }));
     return;
   }
+
   res.send({ status: "ok" });
 });
 
@@ -83,6 +156,7 @@ app.post("/upload/:id", upload.array("files", 10), (req, res) => {
     const { name } = req.body;
     console.log("Received name:", name);
     const files = req.files;
+    //todo: upload to drive
     console.log("Received files:", files);
     res.send({ upload_status: "ok", data: files });
   } catch (error) {
