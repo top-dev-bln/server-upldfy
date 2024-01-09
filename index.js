@@ -6,7 +6,6 @@ const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
 const path = require("path");
 const { Client } = require("pg");
-const { get } = require("http");
 
 dotenv.config();
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -35,7 +34,6 @@ app.get("/", function (req, res) {
 
 app.get("/page-info/:page_id", async (req, res) => {
   const page_id = req.params.page_id;
-  
 
   const client = new Client({
     connectionString: connectionString,
@@ -50,7 +48,6 @@ app.get("/page-info/:page_id", async (req, res) => {
           if (err) {
             console.log(err.message);
           } else {
-            console.log(result.rows[0]);
             res.send(JSON.stringify(result.rows[0]));
           }
         }
@@ -70,34 +67,6 @@ app.get("/my-pages", async (req, res) => {
     },
   });
   const { data: data, error } = await authed.from("pages").select("*");
-
-  /*
-
-                                              
-
-                                              //print all folder names
-                                               */
-
-  
-  const { data: profiles } = await authed.from("profiles").select("*");
-  const token = profiles[0].token;
-
-  oauth2Client.setCredentials({
-    refresh_token: token,
-});
-
-const drive = google.drive({
-  version: "v3",
-  auth: oauth2Client,
-});
-const response = await drive.files.list({
-  q: "mimeType='application/vnd.google-apps.folder'",
-});
-console.log("FOLDERS:");
-response.data.files.forEach((file) => {
-  console.log(file);
-});
-  
 
   res.send({ status: "ok", data: data });
 });
@@ -127,37 +96,43 @@ app.post("/token/:user_id", async (req, res) => {
     return;
   }
 
-  const{data:profiles} = await authed 
-  .from("profiles")
-  .update({token:ref_tkn})
-  
+  // const { data: profile } = await authed.from("profiles").select("*");
 
-  console.log();
-
-  if(false){
+  if (false /*profile[0].folder === null*/) {
+    console.log("deschide gaoaza");
 
     oauth2Client.setCredentials({
-      refresh_token: token,
-  });
-  
-  const drive = google.drive({
-    version: "v3",
-    auth: oauth2Client,
-  });
-  
-  const response = await drive.files.list({
-    q: "mimeType='application/vnd.google-apps.folder'",
-  });
-  console.log("FOLDERS:");
-  response.data.files.forEach((file) => {
-    console.log(file);
-  });
-  
+      refresh_token: ref_tkn,
+    });
 
+    const drive = google.drive({
+      version: "v3",
+      auth: oauth2Client,
+    });
+
+    const folderMetadata = {
+      name: "upldfy",
+      mimeType: "application/vnd.google-apps.folder",
+    };
+    const folder = await drive.files.create({
+      resource: folderMetadata,
+      fields: "id",
+    });
+
+    //update folder id in supabase
+    const { data, error } = await authed
+      .from("profiles")
+      .update({ folder: folder.data.id })
+      .eq("id", user_id)
+      .select();
+    if (error) {
+      console.error(error);
+      res.send(JSON.stringify({ error: error }));
+      return;
+    }
+
+    console.log("Folder Id: ", folder.data.id);
   }
-
-
-
 
   res.send({ status: "ok" });
 });
@@ -186,14 +161,30 @@ app.post("/create-page", async (req, res) => {
 });
 
 app.post("/upload/:id", upload.array("files", 10), (req, res) => {
-  const id = req.params.id;
+  const page_id = req.params.id;
 
   try {
     const { name } = req.body;
-    console.log("Received name:", name);
     const files = req.files;
+
+    const client = new Client({
+      connectionString: connectionString,
+    });
+
+    client
+      .connect()
+      .then(() => {
+        client.query(
+          "INSERT INTO public.uploads(origin, name) VALUES ($1, $2)",
+          [page_id, name]
+        )();
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+
     //todo: upload to drive
-    console.log("Received files:", files);
+
     res.send({ upload_status: "ok", data: files });
   } catch (error) {
     console.error("Error ", error);
