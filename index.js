@@ -96,9 +96,13 @@ app.post("/token/:user_id", async (req, res) => {
     return;
   }
 
-  // const { data: profile } = await authed.from("profiles").select("*");
+  const { data: profile } = await authed
+    .from("profiles")
+    .select("folder")
+    .eq("id", user_id);
+  console.log(profile[0]);
 
-  if (false /*profile[0].folder === null*/) {
+  if (profile[0].folder === null) {
     console.log("deschide gaoaza");
 
     oauth2Client.setCredentials({
