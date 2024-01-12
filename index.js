@@ -157,6 +157,12 @@ app.post("/create-page", async (req, res) => {
     return;
   }
 
+  const { data: data2, error: error2 } = await authed
+    .from("profiles")
+    .select("token");
+
+  const ref_tkn = data2[0].token;
+
   oauth2Client.setCredentials({
     refresh_token: ref_tkn,
   });
@@ -167,7 +173,7 @@ app.post("/create-page", async (req, res) => {
   });
 
   const folderMetadata = {
-    name: name,
+    name: "penis music",
     mimeType: "application/vnd.google-apps.folder",
   };
   const folder = await drive.files.create({
@@ -175,10 +181,10 @@ app.post("/create-page", async (req, res) => {
     fields: "id",
   });
 
-  const { data: data2, error: error2 } = await authed
-    .from("profiles")
+  const { data: data3, error: error3 } = await authed
+    .from("pages")
     .update({ folder: folder.data.id })
-    .eq("id", user_id)
+    .eq("id", data1[0].id)
     .select();
   if (error) {
     console.error(error);
