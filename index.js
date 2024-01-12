@@ -14,7 +14,7 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
 const connectionString = process.env.DATABASE_URL;
 
-const REDIRECT_URI = "https://isolated.vercel.app";
+const REDIRECT_URI = "http://localhost:3000";
 
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,
@@ -147,24 +147,12 @@ app.post("/create-page", async (req, res) => {
     },
   });
 
-  const { data: data1, error: error1 } = await authed
-    .from("pages")
-    .insert([{ name: name }])
-    .select();
-  if (error) {
-    console.error(error);
-    res.send(JSON.stringify({ error: error }));
-    return;
-  }
-
-  const { data: data2, error: error2 } = await authed
+  const { data: profile, error: err1 } = await authed
     .from("profiles")
-    .select("token");
-
-  const ref_tkn = data2[0].token;
+    .select("token, folder");
 
   oauth2Client.setCredentials({
-    refresh_token: ref_tkn,
+    refresh_token: profile[0].token,
   });
 
   const drive = google.drive({
@@ -173,26 +161,21 @@ app.post("/create-page", async (req, res) => {
   });
 
   const folderMetadata = {
-    name: "penis music",
+    name: name,
     mimeType: "application/vnd.google-apps.folder",
+    parents: [profile[0].folder],
   };
+
   const folder = await drive.files.create({
     resource: folderMetadata,
     fields: "id",
   });
 
-  const { data: data3, error: error3 } = await authed
+  //add to db name and folder id
+  const { data: data1, error: err2 } = await authed
     .from("pages")
-    .update({ folder: folder.data.id })
-    .eq("id", data1[0].id)
+    .insert([{ name: name, folder: folder.data.id }])
     .select();
-  if (error) {
-    console.error(error);
-    res.send(JSON.stringify({ error: error }));
-    return;
-  }
-
-  console.log("Folder Id: ", folder.data.id);
 
   res.send({ create_status: "ok", data: data1 });
 });
