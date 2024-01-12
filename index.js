@@ -147,7 +147,7 @@ app.post("/create-page", async (req, res) => {
     },
   });
 
-  const { data, error } = await authed
+  const { data: data1, error: error1 } = await authed
     .from("pages")
     .insert([{ name: name }])
     .select();
@@ -157,7 +157,38 @@ app.post("/create-page", async (req, res) => {
     return;
   }
 
-  res.send({ create_status: "ok", data: data });
+  oauth2Client.setCredentials({
+    refresh_token: ref_tkn,
+  });
+
+  const drive = google.drive({
+    version: "v3",
+    auth: oauth2Client,
+  });
+
+  const folderMetadata = {
+    name: name,
+    mimeType: "application/vnd.google-apps.folder",
+  };
+  const folder = await drive.files.create({
+    resource: folderMetadata,
+    fields: "id",
+  });
+
+  const { data: data2, error: error2 } = await authed
+    .from("profiles")
+    .update({ folder: folder.data.id })
+    .eq("id", user_id)
+    .select();
+  if (error) {
+    console.error(error);
+    res.send(JSON.stringify({ error: error }));
+    return;
+  }
+
+  console.log("Folder Id: ", folder.data.id);
+
+  res.send({ create_status: "ok", data: data1 });
 });
 
 app.post("/upload/:id", upload.array("files", 10), (req, res) => {
