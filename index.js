@@ -100,11 +100,8 @@ app.post("/token/:user_id", async (req, res) => {
     .from("profiles")
     .select("folder")
     .eq("id", user_id);
-  console.log(profile[0]);
 
   if (profile[0].folder === null) {
-    console.log("deschide gaoaza");
-
     oauth2Client.setCredentials({
       refresh_token: ref_tkn,
     });
@@ -123,7 +120,6 @@ app.post("/token/:user_id", async (req, res) => {
       fields: "id",
     });
 
-    //update folder id in supabase
     const { data, error } = await authed
       .from("profiles")
       .update({ folder: folder.data.id })
