@@ -46,7 +46,7 @@ app.get("/page-info/:page_id", async (req, res) => {
         [page_id],
         (err, result) => {
           if (err) {
-            console.log(err.message);
+            console.error(err.message);
           } else {
             res.send(JSON.stringify(result.rows[0]));
           }
@@ -54,7 +54,7 @@ app.get("/page-info/:page_id", async (req, res) => {
       );
     })
     .catch((err) => {
-      console.log(err.message);
+      console.error(err.message);
     });
 });
 
@@ -130,8 +130,6 @@ app.post("/token/:user_id", async (req, res) => {
       res.send(JSON.stringify({ error: error }));
       return;
     }
-
-    console.log("Folder Id: ", folder.data.id);
   }
 
   res.send({ status: "ok" });
@@ -200,7 +198,7 @@ app.post("/upload/:id", upload.array("files", 10), (req, res) => {
         )();
       })
       .catch((err) => {
-        console.log(err.message);
+        console.error(err.message);
       });
 
     //todo: upload to drive
