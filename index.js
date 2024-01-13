@@ -72,7 +72,29 @@ app.get("/my-pages", async (req, res) => {
   res.send({ status: "ok", data: data });
 });
 
-//todo app.get pentru files
+app.get("/my-uploads/:page_id", async (req, res) => {
+  const page_id = req.params.page_id;
+  const authed = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    },
+  });
+
+  const { data: data, error } = await authed
+    .from("uploads")
+    .select("*")
+    .eq("origin", page_id);
+  for (let i = 0; i < data.length; i++) {
+    const { data: files, error } = await authed
+      .from("files")
+      .select("*")
+      .eq("origin", data[i].id);
+    data[i].files = files;
+  }
+  res.send({ status: "ok", data: data });
+});
 
 app.post("/token/:user_id", async (req, res) => {
   const { ref_tkn } = req.body;
@@ -178,6 +200,48 @@ app.post("/create-page", async (req, res) => {
   res.send({ create_status: "ok", data: data1 });
 });
 
+app.delete("/delete-page/:id", async (req, res) => {
+  const page_id = req.params.id;
+
+  const authed = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: req.headers.authorization,
+      },
+    },
+  });
+
+  const { data: profile, error: err1 } = await authed
+    .from("profiles")
+    .select("token, folder");
+
+  oauth2Client.setCredentials({
+    refresh_token: profile[0].token,
+  });
+
+  const drive = google.drive({
+    version: "v3",
+    auth: oauth2Client,
+  });
+
+  const { data: data1, error: err2 } = await authed
+    .from("pages")
+    .select("folder")
+    .eq("id", page_id);
+
+  await drive.files.delete({
+    fileId: data1[0].folder,
+  });
+
+  const { data, error } = await authed
+    .from("pages")
+    .delete()
+    .eq("id", page_id)
+    .select();
+
+  res.send({ delete_status: "ok" });
+});
+
 app.post("/upload/:id", upload.array("files", 10), (req, res) => {
   const page_id = req.params.id;
 
@@ -190,51 +254,64 @@ app.post("/upload/:id", upload.array("files", 10), (req, res) => {
     });
 
     client.connect().then(() => {
-      client.query(
-        "INSERT INTO public.uploads(origin, name) VALUES ($1, $2) RETURNING id",
-        [page_id, name],
+      //get owner from page id
+      const owner = client.query(
+        "SELECT owner FROM public.pages WHERE id = $1",
+        [page_id],
         (err, result) => {
           if (err) {
             console.error(err.message);
           } else {
-            const uploadId = result.rows[0].id;
+            const owner = result.rows[0].owner;
 
             client.query(
-              "SELECT p.token,pg.folder FROM pages AS pg JOIN profiles AS p ON pg.owner = p.id WHERE pg.id = $1",
-              [page_id],
+              "INSERT INTO public.uploads(origin,owner, name) VALUES ($1, $2, $3) RETURNING id",
+              [page_id, owner, name],
               (err, result) => {
                 if (err) {
                   console.error(err.message);
                 } else {
-                  oauth2Client.setCredentials({
-                    refresh_token: result.rows[0].token,
-                  });
+                  const uploadId = result.rows[0].id;
 
-                  const drive = google.drive({
-                    version: "v3",
-                    auth: oauth2Client,
-                  });
+                  client.query(
+                    "SELECT p.token,pg.folder FROM pages AS pg JOIN profiles AS p ON pg.owner = p.id WHERE pg.id = $1",
+                    [page_id],
+                    (err, result) => {
+                      if (err) {
+                        console.error(err.message);
+                      } else {
+                        oauth2Client.setCredentials({
+                          refresh_token: result.rows[0].token,
+                        });
 
-                  files.forEach(async (file) => {
-                    const fileMetadata = {
-                      name: file.originalname,
-                      parents: [result.rows[0].folder],
-                    };
-                    const media = {
-                      mimeType: file.mimetype,
-                      body: new stream.PassThrough().end(file.buffer),
-                    };
-                    const response = await drive.files.create({
-                      resource: fileMetadata,
-                      media: media,
-                      fields: "id",
-                    });
+                        const drive = google.drive({
+                          version: "v3",
+                          auth: oauth2Client,
+                        });
 
-                    client.query(
-                      "INSERT INTO public.files(origin,link) VALUES ($1, $2)",
-                      [uploadId, response.data.id]
-                    );
-                  });
+                        files.forEach(async (file) => {
+                          const fileMetadata = {
+                            name: file.originalname,
+                            parents: [result.rows[0].folder],
+                          };
+                          const media = {
+                            mimeType: file.mimetype,
+                            body: new stream.PassThrough().end(file.buffer),
+                          };
+                          const response = await drive.files.create({
+                            resource: fileMetadata,
+                            media: media,
+                            fields: "id",
+                          });
+
+                          client.query(
+                            "INSERT INTO public.files(origin,owner,link) VALUES ($1, $2, $3)",
+                            [uploadId, owner, response.data.id]
+                          );
+                        });
+                      }
+                    }
+                  );
                 }
               }
             );
