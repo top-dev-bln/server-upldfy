@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
 const path = require("path");
 const { Client } = require("pg");
+const stream = require("stream");
 
 dotenv.config();
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -14,7 +15,7 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
 const connectionString = process.env.DATABASE_URL;
 
-const REDIRECT_URI = "https://isolated.vercel.app";
+const REDIRECT_URI = "http://localhost:3000";
 
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,
@@ -169,7 +170,6 @@ app.post("/create-page", async (req, res) => {
     fields: "id",
   });
 
-  //add to db name and folder id
   const { data: data1, error: err2 } = await authed
     .from("pages")
     .insert([{ name: name, folder: folder.data.id }])
@@ -189,25 +189,64 @@ app.post("/upload/:id", upload.array("files", 10), (req, res) => {
       connectionString: connectionString,
     });
 
-    client
-      .connect()
-      .then(() => {
-        client.query(
-          "INSERT INTO public.uploads(origin, name) VALUES ($1, $2)",
-          [page_id, name]
-        )();
-      })
-      .catch((err) => {
-        console.error(err.message);
-      });
+    client.connect().then(() => {
+      client.query(
+        "INSERT INTO public.uploads(origin, name) VALUES ($1, $2) RETURNING id",
+        [page_id, name],
+        (err, result) => {
+          if (err) {
+            console.error(err.message);
+          } else {
+            const uploadId = result.rows[0].id;
 
-    //todo: upload to drive
+            client.query(
+              "SELECT p.token,pg.folder FROM pages AS pg JOIN profiles AS p ON pg.owner = p.id WHERE pg.id = $1",
+              [page_id],
+              (err, result) => {
+                if (err) {
+                  console.error(err.message);
+                } else {
+                  oauth2Client.setCredentials({
+                    refresh_token: result.rows[0].token,
+                  });
 
-    res.send({ upload_status: "ok", data: files });
-  } catch (error) {
-    console.error("Error ", error);
-    res.status(500).json({ error: "Internal server error" });
+                  const drive = google.drive({
+                    version: "v3",
+                    auth: oauth2Client,
+                  });
+
+                  files.forEach(async (file) => {
+                    const fileMetadata = {
+                      name: file.originalname,
+                      parents: [result.rows[0].folder],
+                    };
+                    const media = {
+                      mimeType: file.mimetype,
+                      body: new stream.PassThrough().end(file.buffer),
+                    };
+                    const response = await drive.files.create({
+                      resource: fileMetadata,
+                      media: media,
+                      fields: "id",
+                    });
+
+                    client.query(
+                      "INSERT INTO public.files(origin,link) VALUES ($1, $2)",
+                      [uploadId, response.data.id]
+                    );
+                  });
+                }
+              }
+            );
+          }
+        }
+      );
+    });
+  } catch (err) {
+    console.error(err);
   }
+
+  res.send({ upload_status: "ok" });
 });
 
 app.post("/drive", async (req, res) => {
