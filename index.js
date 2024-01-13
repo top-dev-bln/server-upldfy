@@ -305,8 +305,13 @@ app.post("/upload/:id", upload.array("files", 10), (req, res) => {
                           });
 
                           client.query(
-                            "INSERT INTO public.files(origin,owner,link) VALUES ($1, $2, $3)",
-                            [uploadId, owner, response.data.id]
+                            "INSERT INTO public.files(origin,owner,link,name) VALUES ($1, $2, $3, $4)",
+                            [
+                              uploadId,
+                              owner,
+                              response.data.id,
+                              file.originalname,
+                            ]
                           );
                         });
                       }
