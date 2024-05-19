@@ -15,7 +15,7 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
 const connectionString = process.env.DATABASE_URL;
 
-const REDIRECT_URI = "http://192.168.0.102:3000/my-pages";
+const REDIRECT_URI = "https://isolated.vercel.app/my-pages";
 
 const oauth2Client = new google.auth.OAuth2(
     CLIENT_ID,
