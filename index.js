@@ -342,6 +342,7 @@ app.post("/upload/:id", upload.array("files", 10), (req, res) => {
 
         client.connect().then(() => {
             //get owner from page id
+            console.log("connected");
             const owner = client.query(
                 "SELECT owner FROM public.pages WHERE id = $1", [page_id],
                 (err, result) => {
