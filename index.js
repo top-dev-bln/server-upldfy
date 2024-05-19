@@ -26,7 +26,7 @@ const oauth2Client = new google.auth.OAuth2(
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const app = express();
-app.use(cors());
+app.use(cors(origin = "*"));
 app.use(express.json());
 
 app.get("/", function(req, res) {
