@@ -27,7 +27,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const app = express();
 app.use(cors({
-    origin: "*"
+    origin: "https://isolated.vercel.app"
 }));
 app.use(express.json());
 
